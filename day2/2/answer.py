@@ -14,7 +14,7 @@ class Game:
         Y axis (2nd element) represents the player
         X axis (1st element) represents the opponent
         '''
-        self.scores = [ [4,1,7], [8,5,2], [3,9,6] ]
+        self.scores = [ [3,1,2], [4,5,6], [8,9,7] ]
 
     def getScore(self):
         return self.my_score
@@ -31,32 +31,47 @@ class Game:
     def score(self, code:str) -> int:
         rule = ()
         # BUGBUG match/case not recognized in VS Code
+        # X = Force loss
+        # Y = Force draw
+        # Z = force win
 
-        if code == "AX":    #AA 4   TIE     ROCK PLAY ROCK
+        if code == "AX":    #AC 3   FL      SCISSORS LOSES TO ROCK
             rule = (0,0)
-        elif code == "BX":  #BA 1   LOSS    ROCK PLAY PAPER 
+        elif code == "BX":  #BA 1   FL      ROCK LOSES TO PAPER
             rule = (0,1)
-        elif code == "CX":  #CA 7   WIN     ROCK PLAY SCISSORS
+        elif code == "CX":  #CA 2   FL      PAPER LOSES TO SCISSORS
             rule = (0,2)    
         
-        elif code == "AY":  #AB 8   WIN     PAPER PLAY ROCK
+        elif code == "AY":  #AA 4   FD      ROCK DRAWS ROCK
             rule = (1,0)
-        elif code == "BY":  #BB 5   TIE     PAPER PLAY PAPER
+        elif code == "BY":  #BB 5   FD      PAPER DRAWS PAPER
             rule = (1,1)
-        elif code == "CY":  #CB 2   LOSS    PAPER PLAY SCISSORS
+        elif code == "CY":  #CC 6   FD      SCISSORS DRAWS SCISSORS
             rule = (1,2)
         
-        elif code == "AZ":  #CA 3   LOSS    SCISSOSRS PLAY ROCK
+        elif code == "AZ":  #AC 8   FW      PAPER BEATS ROCK
             rule = (2,0)
-        elif code == "BZ":  #CB 9   WIN     SCISSORS PLAY PAPER
+        elif code == "BZ":  #BC 9   FW      SCISSORS BEAT PAPER
             rule = (2,1)
-        elif code == "CZ":  #CC 6   TIE     SCISSORS PLAY SCISSORS
+        elif code == "CZ":  #CA 7   FW      ROCK BEATS SCISSORS
             rule = (2,2)
         else:
             raise Exception(f"No match. Code={code}")
         
         self.round_count += 1
         return self.scores[ rule[0] ] [ rule[1] ]
+
+
+'''
+A Y
+B X
+C Z
+'''
+rps = Game()
+rps.playRound("A","Y")
+rps.playRound("B","X")
+rps.playRound("C","Z")
+print (f"Answer={rps.getScore()}")
 
 rps = Game()
 line_count = 0
@@ -65,4 +80,5 @@ with open("input.txt", "r") as input:
         line_count += 1
         rps.playRound(line[0], line[2])
 
+# Attempt 1: 11630 (too low)
 print (f"Answer={rps.getScore()} | Lines={line_count} | Rounds={rps.getRoundCount()}") 
