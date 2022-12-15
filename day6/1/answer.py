@@ -1,5 +1,5 @@
 signal = ""
-with open('/Users/pikirk/src/aoc22/day6/1/input.txt', 'r') as fp:
+with open('input.txt', 'r') as fp:
     while True:
         char = fp.read(1)
         if not char: break
