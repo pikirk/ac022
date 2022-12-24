@@ -26,7 +26,7 @@ class FileSystem:
             self.dag.add_edge(self.cur_node, leaf_name)
             self.seen_nodes.append(leaf_name)
 
-    def addFile(self, file_info:str):
+    def addFile(self, dir:str, file_info:str):
         assert file_info != ''
         file = self.parseFileInfo( file_info )
         self.dag.nodes[self.cur_node]["files"].append( file )
@@ -135,7 +135,7 @@ class FileSystem:
     def parseInput(self, statements:list):
         ls = []
         for l in range(0, len(statements)):
-            statement = lines.pop(0).removesuffix('\n')
+            statement = statements.pop(0).removesuffix('\n')
             if statement.startswith('$'):
                 if statement.startswith('$ cd') and len(ls) == 0:
                     folder = (statement.split(" ")[2])
@@ -153,21 +153,53 @@ class FileSystem:
                 ls.append(statement)
         self.addFiles(ls)
 
+        if len(ls) != 0:
+            self.addFiles(ls)
+
     def addFiles(self, ls:list):
+        cur_dir = ''
         for s in range(0, len(ls)):
             info = ls.pop(0)
             if info.startswith("dir"):
                 dir = info.replace('dir ', '')
                 self.mkdir(dir)
+                cur_dir = dir
             else:
-                self.addFile(info)
+                self.addFile(cur_dir, info)
+
+    def getFileCount(self, leaf:str):
+        files = self.dag.nodes[leaf]['files']
+        print (f"Files={files}")
+        return len( [n[0] for n in files] )
+
+    def getDirSize(self, leaf:str):
+        files = self.dag.nodes[leaf]['files']
+        print (f"Files={files}")
+        return sum( [n[0] for n in files] )
+        
 
 
 lines = []
 with open("/Users/pikirk/src/aoc22/day7/1/input.txt", "r") as input:
     lines = input.readlines()
 
-fs = FileSystem(lines)
+statements = ['$ cd /\n'
+,'$ ls\n'
+,'dir A\n'
+,'199775 dngdnvv.qdf\n'
+,'dir B\n'
+,'dir C\n'
+,'dir D\n'
+,'23392 lbcgmm\n'
+,'251030 lsw.jgr\n'
+,'305227 nflgvsgz\n'
+,'dir E\n'
+,'dir F\n'
+,'dir G\n'
+,'dir H\n'
+,'dir I\n'
+,'202033 zqzlbvgl\n']
+fs = FileSystem(statements)
 
 # 1,053,250 (too low)
 # 1,242,972 (too low)
