@@ -7,130 +7,42 @@ import networkx as nx
 class FileSystem:
     def __init__(self, statements:list):
         self.dag = nx.DiGraph()
-        self.dag.add_nodes_from([("/", {"files" : [] } )])
-        self.cur_node = "/"
-        self.seen_nodes = [self.cur_node]
+        self.node_counter = 0
+        self.cur_node = ()
+        self.dag.add_node(self.node_counter, dir='/', files=[])
+        self.seen_nodes = [(0, '/')]
         self.parseInput(statements)
 
     def cd(self, to_node:str):
-        assert self.seen_nodes.count(to_node) == 1 or to_node == '..'
         if to_node == "..":
-            for parent in  iter(self.dag.predecessors(self.cur_node)):
-                self.cur_node = parent
+            parent = next( iter(self.dag.predecessors(self.cur_node[0])))
+            self.cur_node = (parent, self.dag.nodes[parent]['dir'])
+        elif to_node == '/':
+            self.cur_node = (self.node_counter, '/')
         else:
-            self.cur_node = to_node
+            for c in iter(self.dag.successors(self.cur_node[0])):
+                if self.dag.nodes[c]['dir'] == to_node:
+                    self.cur_node = (c, to_node)
+                    break
 
     def mkdir(self, leaf_name:str):
-        if self.seen_nodes.count(leaf_name) == 0:
-            self.dag.add_nodes_from([(leaf_name, {"files" : [] } )])
-            self.dag.add_edge(self.cur_node, leaf_name)
-            self.seen_nodes.append(leaf_name)
+        self.node_counter += 1
+        self.dag.add_node(self.node_counter, dir=leaf_name, files=[])
+        self.dag.add_edge(self.cur_node[0], self.node_counter)
+        self.seen_nodes.append((self.node_counter, leaf_name))
 
-    def addFile(self, dir:str, file_info:str):
+    def addFile(self, file_info:str):
         assert file_info != ''
         file = self.parseFileInfo( file_info )
-        self.dag.nodes[self.cur_node]["files"].append( file )
+        self.dag.nodes[self.cur_node[0]]["files"].append( file )
 
     def parseFileInfo(self, file:str) -> Tuple[int, str]:
         parts = file.split(" ")
         return (int(parts[0]), parts[1])
-
-    def calculateSize(self) -> int:
-        roots = (v for v, d in self.dag.in_degree() if d == 0)
-        leaves = [v for v, d in self.dag.out_degree() if d == 0]
-        all_paths = []
-        for root in roots:
-            paths = nx.all_simple_paths(self.dag, root, leaves)
-            all_paths.extend(paths)
-        
-        sum = 0
-        for p in range(0, len(all_paths)):
-            result = self.getSize( all_paths.pop() )
-            if result <= 100000: sum+=result
-        return sum
-
-    def getSize(self, path:list) -> int:
-        nodes = path.copy()
-        result = 0
         check = 100000
-        while len(nodes) != 0:
-            dir_size = 0
-            for n in range(0, len(nodes)):
-                node = nodes[n]
-                files = self.dag.nodes[node]['files']
-                dir_size += sum( [n[0] for n in files] )
-            
-            if dir_size <= check:
-                result += dir_size
-            
-            nodes.pop(0)
-        return result 
-
-    def getSize_sample(self, path:list) -> int:
-        nodes = copy.deepcopy(path)
-        nodes.pop(0) # handle root later
-        check = 100000
-        dir_size = 0
-        for n in range(0, len(nodes)):
-            node = nodes[n]
-            files = self.dag.nodes[node]['files']
-            dir_size += sum( [n[0] for n in files] )
-
-        if dir_size > check:
-            dir_size = 0
-
-        # sum the last leaf
-        dir_last = 0
-        if dir_size != 0:
-            nodes = copy.deepcopy(path)
-            nodes.remove('/')
-            if (len(nodes) > 1):
-                last = nodes.pop(-1)
-                files = self.dag.nodes[last]['files']
-                dir_last = sum( [n[0] for n in files] )
-
-        return dir_size + dir_last
-    
-    def getRootSize(self) -> int:
-        check = 100000
-        files = self.dag.nodes['/']['files']
-        root_size = sum( [n[0] for n in files] )
+        files = self.dag.nodes[0]['files']
+        root_size = sum( [f[0] for f in files] )
         return root_size if (root_size <= check) else 0
-
-    def printDirSizes(self):
-        roots = (v for v, d in self.dag.in_degree() if d == 0)
-        leaves = [v for v, d in self.dag.out_degree() if d == 0]
-        all_paths = []
-        for root in roots:
-            paths = nx.all_simple_paths(self.dag, root, leaves)
-            all_paths.extend(paths)
-
-        total = 0
-        paths = copy.deepcopy(all_paths)
-
-        for p in range (0, len(paths)):
-            path = paths[p]
-            dir_size = 0
-            path.remove('/')
-            for n in range(0, len(path)):
-                node = path[n]
-                files = self.dag.nodes[node]['files']
-                dir_size += sum( [n[0] for n in files] ) 
-
-            mark = "---->" if (dir_size <= 100000) else ""   
-            print (f"{mark}{all_paths[p]}={dir_size}")
-            total += dir_size
-
-        paths = copy.deepcopy(all_paths)
-        for n in range(0, len(paths)):
-            path = paths[n]
-            path.remove('/')
-            if (len(path) > 1):
-                node = path.pop(-1)
-                files = self.dag.nodes[node]['files']
-                size = sum( [n[0] for n in files] ) 
-                mark = "---->" if (size <= 100000) else ""   
-                print (f"{mark}Dir:{node}={size}")
 
     def parseInput(self, statements:list):
         ls = []
@@ -157,51 +69,52 @@ class FileSystem:
             self.addFiles(ls)
 
     def addFiles(self, ls:list):
-        cur_dir = ''
         for s in range(0, len(ls)):
             info = ls.pop(0)
             if info.startswith("dir"):
                 dir = info.replace('dir ', '')
                 self.mkdir(dir)
-                cur_dir = dir
             else:
-                self.addFile(cur_dir, info)
-
-    def getFileCount(self, leaf:str):
+                self.addFile(info)
+    
+    def getFileCount(self, leaf:int):
         files = self.dag.nodes[leaf]['files']
-        print (f"Files={files}")
         return len( [n[0] for n in files] )
 
-    def getDirSize(self, leaf:str):
+    def getDirSize(self, leaf:int):
         files = self.dag.nodes[leaf]['files']
-        print (f"Files={files}")
         return sum( [n[0] for n in files] )
-        
+        result = list(nx.dfs_postorder_nodes(self.dag))
+        return result
 
+    def calculateSize(self) -> int:
+        result = 0
+        check = 100000
+        for n in range(0, len(self.dag.nodes())):
+            size = self.calculateDirSize(n)
+            if size <= check:
+                print (f"{self.dag.nodes[n]['dir'], size}")
+                result += size
+        return result
 
-lines = []
+    def calculateDirSize(self, node:int) -> int:
+        parent_size = 0
+        cur_node = node
+        files = self.dag.nodes[cur_node]['files']
+        parent_size += sum( [f[0] for f in files] )
+
+        children = list(iter(self.dag.successors(cur_node)))
+        leaves_size = 0   
+        while (len(children) > 0):        
+            for c in range(0, len( children )):
+                cur_node = children.pop(0)
+                files = self.dag.nodes[cur_node]['files']
+                leaves_size += sum( [f[0] for f in files] )
+                children = children + list(iter(self.dag.successors(cur_node))) 
+        return parent_size + leaves_size
+            
+statements = []
 with open("/Users/pikirk/src/aoc22/day7/1/input.txt", "r") as input:
-    lines = input.readlines()
-
-statements = ['$ cd /\n'
-,'$ ls\n'
-,'dir A\n'
-,'199775 dngdnvv.qdf\n'
-,'dir B\n'
-,'dir C\n'
-,'dir D\n'
-,'23392 lbcgmm\n'
-,'251030 lsw.jgr\n'
-,'305227 nflgvsgz\n'
-,'dir E\n'
-,'dir F\n'
-,'dir G\n'
-,'dir H\n'
-,'dir I\n'
-,'202033 zqzlbvgl\n']
-fs = FileSystem(statements)
-
-# 1,053,250 (too low)
-# 1,242,972 (too low)
-# 1,323,774 (?)
-print (fs.calculateSize() + fs.getRootSize())
+    statements = input.readlines()
+fs = FileSystem(statements) 
+print (fs.calculateSize() )
