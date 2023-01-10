@@ -19,6 +19,8 @@ class Picker:
         self.top_right_edge_max = ()
         self.bottom_edge_max = ()
         self.bottom_right_edge_max = ()
+        self.bottom_edge_min = ()
+        self.bottom_left_edge_min = ()
     
     @staticmethod
     def init(grid_height:int, grid_width:int) -> Picker:
