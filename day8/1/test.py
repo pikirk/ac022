@@ -57,3 +57,51 @@ def test_start_left_then_shift_right():
     assert p.bot == (3,2)
     assert p.left == (2,1)
     assert p.center == (2,2)
+
+def test_cannot_shift_right():
+    # arrange
+    p = Picker.init()
+    for m in range(0, 3):
+        Picker.shift_right(p)
+
+    # act
+    result = Picker.preview_shift_right(p, 5)
+
+    # assert
+    assert result == False
+
+def test_last_shift_right():
+    # arrange
+    p = Picker.init()
+    for m in range(0, 2):
+        Picker.shift_right(p)
+
+    # act
+    result = Picker.preview_shift_right(p, 5)
+
+    # assert
+    assert result == True
+
+def test_cannot_start_left():
+    # arrange
+    p = Picker.init()
+    for m in range(0, 3):
+        Picker.start_left(p)
+
+    # act
+    result = Picker.preview_start_left(p, 5)
+
+    # assert
+    assert result == False
+
+def test_last_start_left():
+    # arrange
+    p = Picker.init()
+    for m in range(0, 2):
+        Picker.start_left(p)
+
+    # act
+    result = Picker.preview_start_left(p, 5)
+
+    # assert
+    assert result == True

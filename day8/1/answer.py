@@ -43,11 +43,13 @@ class Picker:
 
     @staticmethod
     def preview_shift_right(p:Picker, grid_width:int):
-        print ('preview shift right')
+        edge_test = p.right[1] + 1
+        return edge_test <= grid_width
 
     @staticmethod
     def preview_start_left(p:Picker, grid_height:int):
-        print ('preview start left')
+        edge_test = p.bot[0] + 1
+        return edge_test <= grid_height
 
     @staticmethod
     def is_hidden(p:Picker) -> bool:
