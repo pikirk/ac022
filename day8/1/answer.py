@@ -35,7 +35,11 @@ class Picker:
 
     @staticmethod
     def start_left(p:Picker):
-        print ('start left')
+        p.top = (p.top[0] + 1, p.top[1])
+        p.right = (p.right[0] + 1, p.right[1])
+        p.bot = (p.bot[0] + 1, p.bot[1])
+        p.left = (p.left[0] + 1, p.left[1])
+        p.center = (p.center[0] + 1, p.center[1])
 
     @staticmethod
     def preview_shift_right(p:Picker, grid_width:int):
