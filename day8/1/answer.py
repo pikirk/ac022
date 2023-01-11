@@ -4,6 +4,21 @@
 
 from __future__ import annotations
 from typing import Tuple
+from enum import Enum
+class Corner(Enum):
+    NONE = 0
+    TOP_LEFT = 1
+    TOP_RIGHT = 2
+    BOT_LEFT = 3
+    BOT_RIGHT = 4
+
+class Edge(Enum):
+    NONE = 0
+    TOP = 1
+    RIGHT = 2
+    LEFT = 3
+    BOT = 4
+
 class Picker:
     def __init__(self):
         self.top = ()
@@ -14,7 +29,11 @@ class Picker:
         self.grid_height = 0
         self.grid_width = 0
         self.is_corner = False
+        self.edge = Edge.NONE
+        self.corner = Corner.NONE
         self.is_edge = False
+        self.top_edge_min = ()
+        self.top_left_edge_min = ()
         self.top_edge_max = ()
         self.top_right_edge_max = ()
         self.bottom_edge_max = ()
@@ -33,6 +52,8 @@ class Picker:
         p.grid_height = grid_height
         p.grid_width = grid_width
         p.is_corner = True
+        p.top_edge_min = (0,1)
+        p.top_left_edge_min = (1,0)
         p.top_edge_max = (0, p.grid_width - 2)
         p.top_right_edge_max = (1, p.grid_width - 1)
         p.bottom_edge_max = (p.grid_height -1, p.grid_width - 2)
@@ -67,17 +88,25 @@ class Picker:
     def setBoundaryState(p:Picker):
         p.is_corner = False
         p.is_edge = False
-        
-        # corner states - grid intitialized to top left corner
-        # TODO edges
+        p.corner = Corner.NONE
+        p.edge = Edge.NONE
+
+        # corner states - picker initialized to top left corner
         if ( p.right == p.top_right_edge_max and p.top == p.top_edge_max ):
             p.is_corner = True
+            p.corner = Corner.TOP_RIGHT
 
         elif ( p.right == p.bottom_right_edge_max and p.bot == p.bottom_edge_max ):
             p.is_corner = True
+            p.corner = Corner.BOT_RIGHT
 
         elif ( p.bot == p.bottom_edge_min and p.left == p.bottom_left_edge_min ):
             p.is_corner = True
+            p.corner = Corner.BOT_LEFT
+        
+        elif ( state := p.getEdgeState() == Edge.TOP ):
+            p.is_edge = True
+            p.edge = state
             
     def preview_shift_right(self):
         edge_test = self.right[1] + 1
@@ -87,8 +116,26 @@ class Picker:
         edge_test = self.bot[0] + 1
         return edge_test <= self.grid_height
 
+    def getEdgeState(self): 
+        ret_value = Edge.NONE
+        print (self.bottom_edge_min)
+        print (self.bot)
+        print (self.bottom_edge_max)
+
+        # top edge
+        if self.top > self.top_edge_min and self.top < self.top_edge_max:
+            ret_value = Edge.TOP
+        # left edge
+        elif self.left > self.top_left_edge_min and self.left < self.bottom_left_edge_min:
+            ret_value = Edge.LEFT
+        # bottom edge
+        elif self.bot > self.bottom_edge_min and self.bot < self.bottom_edge_max:
+            ret_value = Edge.BOT
+            
+        return ret_value
+
 class Grid:
-    def __init(self, tree_map:list[list[int]]):
+    def __init__(self, tree_map:list[list[int]]):
         h = len(tree_map)
         w = len(len(tree_map[0]))
         self.cur_picker = Picker.init(h, w)
@@ -109,3 +156,18 @@ class Grid:
     def getCurrentPicker(self):
         return self.cur_picker
 
+    def getPickerValues(self):
+        print('get picker values')
+
+def test_top_edge():
+    p = Picker.init(5,5)
+
+     # act
+    for r in range(0, 1):
+        Picker.shift_right(p)
+
+    # assert
+    assert p.getEdgeState() == Edge.TOP
+
+
+test_top_edge()
