@@ -294,3 +294,19 @@ def test_last_row_right_score():
         grid.movePicker()
 
     assert False == grid.score()
+
+def test_score_grid():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    result = grid.scoreGrid()
+
+    assert 5 + 16 == result

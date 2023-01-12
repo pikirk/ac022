@@ -5,6 +5,9 @@
 from __future__ import annotations
 from typing import Tuple
 
+'''
+Responsible for knowing its position on the tree map
+'''
 class Picker:
     def __init__(self):
         self.top = ()
@@ -67,6 +70,9 @@ class Picker:
         edge_test = self.bot[0] + 1
         return edge_test < self.grid_height
 
+'''
+Responsible for inspecting the visiblity of tree houses
+'''
 class Grid:
     def __init__(self, tree_map:list[list[int]]):
         h = len(tree_map)
@@ -74,8 +80,7 @@ class Grid:
         self.cur_picker = Picker.init(h, w)
         self.map = tree_map
 
-    def movePicker(self) -> Tuple(int, bool):
-        ret_value = ()
+    def movePicker(self):
         can_shift_right = self.cur_picker.preview_shift_right()
         can_start_left = self.cur_picker.preview_start_left()
         if can_shift_right:
@@ -84,27 +89,29 @@ class Grid:
         
         if can_start_left:
             Picker.start_left(self.cur_picker)
-            return self.getPickerValues()
-        return ret_value
 
     def getPickerValues(self) -> list(type()):
+        # top
         tval = self.map[self.cur_picker.top[0]][self.cur_picker.top[1]]
         t = ('T', tval)
-
+        # left
         lval = self.map[self.cur_picker.left[0]][self.cur_picker.left[1]]
         l = ('L', lval)
-        
+        # center
         cval = self.map[self.cur_picker.center[0]][self.cur_picker.center[1]]
         c = ('C', cval)
-
+        # right
         rval = self.map[self.cur_picker.right[0]][self.cur_picker.right[1]]
         r = ('R', rval)
-        
+        # bottom
         bval = self.map[self.cur_picker.bot[0]][self.cur_picker.bot[1]]
         b = ('B', bval)
         
         return (t,l,c,r,b)
     
+    '''
+    Visibility check for current selected tree
+    '''
     def score(self) -> bool:
         cluster = self.getPickerValues()
         top = cluster[0][1]
@@ -112,4 +119,15 @@ class Grid:
         tree_house = cluster[2][1]
         right = cluster[3][1]
         bot = cluster[4][1]
-        return (top < tree_house or left < tree_house or right < tree_house or bot < tree_house)
+        return (top < tree_house or left < tree_house or right < tree_house or bot < tree_house) 
+
+    def scoreGrid(self) -> int:
+        ret_value = 0
+        # walk inner trees
+        while self.cur_picker.preview_shift_right() or self.cur_picker.preview_start_left():
+            ret_value +=1 if self.score() else 0
+            self.movePicker()
+
+        # perimeter value
+        ret_value += (self.cur_picker.grid_width * 2) + ((self.cur_picker.grid_height - 2) * 2)
+        return ret_value
