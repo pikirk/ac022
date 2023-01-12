@@ -1,7 +1,3 @@
-#statements = []
-#with open("/Users/pikirk/src/aoc22/day8/1/input.txt", "r") as input:
-# statements = input.readlines()
-
 from __future__ import annotations
 from typing import Tuple
 
@@ -90,6 +86,9 @@ class Grid:
         if can_start_left:
             Picker.start_left(self.cur_picker)
 
+    '''
+    Looks up grid values based on the picker's current position
+    '''
     def getPickerValues(self) -> list(type()):
         # top
         tval = self.map[self.cur_picker.top[0]][self.cur_picker.top[1]]
@@ -121,6 +120,9 @@ class Grid:
         bot = cluster[4][1]
         return (top < tree_house or left < tree_house or right < tree_house or bot < tree_house) 
 
+    '''
+    Processes grid left to right starting at left corner
+    '''
     def scoreGrid(self) -> int:
         ret_value = 0
         # walk inner trees
@@ -131,3 +133,14 @@ class Grid:
         # perimeter value
         ret_value += (self.cur_picker.grid_width * 2) + ((self.cur_picker.grid_height - 2) * 2)
         return ret_value
+
+rows = []
+with open("/Users/pikirk/src/aoc22/day8/1/input.txt", "r") as input:
+    for line in input:
+        line = line.strip('\n')
+        rows.append([int(i) for i in list(line)])
+
+grid = Grid(rows)
+print (grid.scoreGrid())
+
+# 7153 too high
