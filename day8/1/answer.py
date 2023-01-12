@@ -63,7 +63,6 @@ class Picker:
         return p
 
     def visible(self) -> bool:
-        print("is visible")
         return False
 
     @staticmethod
@@ -77,11 +76,11 @@ class Picker:
 
     @staticmethod
     def start_left(p:Picker):
-        p.top = (p.top[0] + 1, p.top[1])
-        p.right = (p.right[0] + 1, p.right[1])
-        p.bot = (p.bot[0] + 1, p.bot[1])
-        p.left = (p.left[0] + 1, p.left[1])
-        p.center = (p.center[0] + 1, p.center[1])
+        p.top = (p.top[0] + 1, 1) #p.top[1])
+        p.right = (p.right[0] + 1, 2) #, p.right[1])
+        p.bot = (p.bot[0] + 1, 1) #, p.bot[1])
+        p.left = (p.left[0] + 1, 0) #p.left[1])
+        p.center = (p.center[0] + 1, 1) #, p.center[1])
         Picker.setBoundaryState(p)
 
     @staticmethod
@@ -110,17 +109,14 @@ class Picker:
             
     def preview_shift_right(self):
         edge_test = self.right[1] + 1
-        return edge_test <= self.grid_width
+        return edge_test < self.grid_width
 
     def preview_start_left(self):
         edge_test = self.bot[0] + 1
-        return edge_test <= self.grid_height
+        return edge_test < self.grid_height
 
     def getEdgeState(self): 
         ret_value = Edge.NONE
-        print (self.bottom_edge_min)
-        print (self.bot)
-        print (self.bottom_edge_max)
 
         # top edge
         if self.top > self.top_edge_min and self.top < self.top_edge_max:
@@ -137,37 +133,60 @@ class Picker:
 class Grid:
     def __init__(self, tree_map:list[list[int]]):
         h = len(tree_map)
-        w = len(len(tree_map[0]))
+        w = len(tree_map[0])
         self.cur_picker = Picker.init(h, w)
         self.map = tree_map
 
     def movePicker(self) -> Tuple(int, bool):
         ret_value = ()
-        can_shift_right = self.cur_picker.preview_shift_right(len(self.map))
-        can_start_left = self.cur_picker.preview_shift_right(len(self.map))
+        can_shift_right = self.cur_picker.preview_shift_right()
+        can_start_left = self.cur_picker.preview_start_left()
         if can_shift_right:
             Picker.shift_right(self.cur_picker)
-            ret_value = (self.cur_picker.center, self.cur_picker.visible())           
-        elif can_start_left:
+            return self.getPickerValues()           
+        
+        if can_start_left:
             Picker.start_left(self.cur_picker)
-            ret_value = (self.cur_picker.center, self.cur_picker.visible())
+            return self.getPickerValues()
         return ret_value
 
     def getCurrentPicker(self):
         return self.cur_picker
 
-    def getPickerValues(self):
-        print('get picker values')
+    def getPickerValues(self) -> list(type()):
+        lval = self.map[self.cur_picker.left[0]][self.cur_picker.left[1]]
+        l = ('L', lval)
+        rval = self.map[self.cur_picker.right[0]][self.cur_picker.right[1]]
+        r = ('R', rval)
+        tval = self.map[self.cur_picker.top[0]][self.cur_picker.top[1]]
+        t = ('T', tval)
+        bval = self.map[self.cur_picker.bot[0]][self.cur_picker.bot[1]]
+        b = ('B', bval)
+        cval = self.map[self.cur_picker.center[0]][self.cur_picker.center[1]]
+        c = ('C', cval)
 
-def test_top_edge():
-    p = Picker.init(5,5)
+        return (t,l,c,r,b)
 
-     # act
-    for r in range(0, 1):
-        Picker.shift_right(p)
+def test_get_last_value():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
 
-    # assert
-    assert p.getEdgeState() == Edge.TOP
+    # act
+    for m in range(0,8):
+        grid.movePicker()
+    val = grid.getPickerValues()
 
+    assert val[0] == ('T', 3)
+    assert val[1] == ('L', 5)
+    assert val[2] == ('C', 4)
+    assert val[3] == ('R', 9)
+    assert val[4] == ('B', 9)
 
-test_top_edge()
+test_get_last_value()

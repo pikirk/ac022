@@ -70,7 +70,7 @@ def test_cannot_shift_right():
 def test_last_shift_right():
     # arrange
     p = Picker.init(5,5)
-    for m in range(0, 2):
+    for m in range(0, 1):
         Picker.shift_right(p)
 
     # act
@@ -92,7 +92,7 @@ def test_cannot_start_left():
 def test_last_start_left():
     # arrange
     p = Picker.init(5,5)
-    for m in range(0, 2):
+    for m in range(0, 1):
         Picker.start_left(p)
 
     # act
@@ -189,3 +189,67 @@ def test_bottom_edge():
         Picker.shift_right(p)
 
     assert p.getEdgeState() == Edge.BOT
+
+def test_get_picker_value():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    val = grid.getPickerValues()
+
+    assert val[0] == ('T', 0)
+    assert val[1] == ('L', 2)
+    assert val[2] == ('C', 5)
+    assert val[3] == ('R', 5)
+    assert val[4] == ('B', 5)
+
+def test_move_right_then_get_value():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    grid.movePicker()
+    val = grid.getPickerValues()
+
+    # assert
+    assert val[0] == ('T', 3)
+    assert val[1] == ('L', 5)
+    assert val[2] == ('C', 5)
+    assert val[3] == ('R', 1)
+    assert val[4] == ('B', 3)
+
+def test_get_last_value():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    for m in range(0,8):
+        grid.movePicker()
+    val = grid.getPickerValues()
+
+    assert val[0] == ('T', 3)
+    assert val[1] == ('L', 5)
+    assert val[2] == ('C', 4)
+    assert val[3] == ('R', 9)
+    assert val[4] == ('B', 9)
