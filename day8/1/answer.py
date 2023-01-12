@@ -58,8 +58,6 @@ class Picker:
         p.bot = (p.bot[0] + 1, 1) 
         p.left = (p.left[0] + 1, 0) 
         p.center = (p.center[0] + 1, 1) 
-        p.is_corner = False
-        p.is_edge = False
             
     def preview_shift_right(self):
         edge_test = self.right[1] + 1
