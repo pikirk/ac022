@@ -68,19 +68,6 @@ class Picker:
     def preview_start_left(self):
         edge_test = self.bot[0] + 1
         return edge_test < self.grid_height
-        ret_value = Edge.NONE
-
-        # top edge
-        if self.top > self.top_edge_min and self.top < self.top_edge_max:
-            ret_value = Edge.TOP
-        # left edge
-        elif self.left > self.top_left_edge_min and self.left < self.bottom_left_edge_min:
-            ret_value = Edge.LEFT
-        # bottom edge
-        elif self.bot > self.bottom_edge_min and self.bot < self.bottom_edge_max:
-            ret_value = Edge.BOT
-            
-        return ret_value
 
 class Grid:
     def __init__(self, tree_map:list[list[int]]):
