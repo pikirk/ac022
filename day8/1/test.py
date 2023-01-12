@@ -3,8 +3,6 @@ import sys
 sys.path.append("/Users/pikirk/Library/Python/3.9/lib/python/site-packages")
 from answer import Grid
 from answer import Picker
-from  answer import Corner
-from answer import Edge
 
 def test_picker_init():
     # arrange
@@ -100,96 +98,6 @@ def test_last_start_left():
 
     assert result == True
 
-def test_initial_position_is_top_left():
-    # arrange
-    p = Picker.init(5,5)
-
-    assert p.is_corner == True
-
-def test_position_is_top_right():
-    # arrange
-    p = Picker.init(5,5)
-
-    # act
-    for c in range(0, 2):
-        Picker.shift_right(p)
-
-    assert p.is_corner == True
-    assert p.is_edge == False
-    assert p.corner == Corner.TOP_RIGHT
-    assert p.edge == Edge.NONE
-
-def test_position_is_bottom_right():
-    # arrange
-    p = Picker.init(5,5)
-
-    # act
-    for r in range(0, 2):
-        Picker.start_left(p)
-    
-    for c in range(0, 2):
-        Picker.shift_right(p)
-
-    assert p.is_corner == True
-    assert p.is_edge == False
-    assert p.corner == Corner.BOT_RIGHT
-    assert p.edge == Edge.NONE
-
-def test_position_is_bottom_left():
-    # arrange
-    p = Picker.init(5,5)
-
-     # act
-    for r in range(0, 2):
-        Picker.start_left(p)
-
-    assert p.is_corner == True
-    assert p.is_edge == False
-    assert p.corner == Corner.BOT_LEFT
-    assert p.edge == Edge.NONE
-
-def test_position_out_of_bounds():
-    # arrange
-    p = Picker.init(5,5)
-
-     # act
-    for r in range(0, 3):
-        Picker.start_left(p)
-
-    assert p.is_corner == False
-
-def test_top_edge():
-    # arrange
-    p = Picker.init(5,5)
-
-     # act
-    for r in range(0, 1):
-        Picker.shift_right(p)
-
-    assert p.getEdgeState() == Edge.TOP
-
-def test_left_edge():
-    # arrange
-    p = Picker.init(5,5)
-
-     # act
-    for r in range(0, 1):
-        Picker.start_left(p)
-
-    assert p.getEdgeState() == Edge.LEFT
-
-def test_bottom_edge():
-    # arrange
-    p = Picker.init(5,5)
-
-     # act
-    for r in range(0, 2):
-        Picker.start_left(p)
-    for r in range(0, 1):
-        Picker.shift_right(p)
-
-    assert p.getEdgeState() == Edge.BOT
-
 def test_get_picker_value():
     # arrange
     map = list([
@@ -253,3 +161,136 @@ def test_get_last_value():
     assert val[2] == ('C', 4)
     assert val[3] == ('R', 9)
     assert val[4] == ('B', 9)
+
+def test_first_score():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    assert True == grid.score()
+
+def test_top_edge_score():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    grid.movePicker()
+
+    assert True == grid.score()
+
+def test_top_right_score():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    grid.movePicker()
+    grid.movePicker()
+
+    assert False == grid.score()
+
+def test_middle_row_left_score():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    grid.movePicker()
+    grid.movePicker()
+    grid.movePicker()
+
+    assert True == grid.score()
+    
+def test_middle_row_right_score():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    for r in range (1, 4):
+        grid.movePicker()
+
+    assert True == grid.score()
+
+def test_last_row_first_score():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    for r in range (1, 5):
+        grid.movePicker()
+
+    assert False == grid.score()
+
+def test_last_row_next_score():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    for r in range (1, 6):
+        grid.movePicker()
+
+    assert True == grid.score()
+
+def test_last_row_right_score():
+    # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    for r in range (1, 7):
+        grid.movePicker()
+
+    assert False == grid.score()

@@ -4,20 +4,6 @@
 
 from __future__ import annotations
 from typing import Tuple
-from enum import Enum
-class Corner(Enum):
-    NONE = 0
-    TOP_LEFT = 1
-    TOP_RIGHT = 2
-    BOT_LEFT = 3
-    BOT_RIGHT = 4
-
-class Edge(Enum):
-    NONE = 0
-    TOP = 1
-    RIGHT = 2
-    LEFT = 3
-    BOT = 4
 
 class Picker:
     def __init__(self):
@@ -28,10 +14,6 @@ class Picker:
         self.center = ()
         self.grid_height = 0
         self.grid_width = 0
-        self.is_corner = False
-        self.edge = Edge.NONE
-        self.corner = Corner.NONE
-        self.is_edge = False
         self.top_edge_min = ()
         self.top_left_edge_min = ()
         self.top_edge_max = ()
@@ -51,7 +33,6 @@ class Picker:
         p.center = (1,1)
         p.grid_height = grid_height
         p.grid_width = grid_width
-        p.is_corner = True
         p.top_edge_min = (0,1)
         p.top_left_edge_min = (1,0)
         p.top_edge_max = (0, p.grid_width - 2)
@@ -62,9 +43,6 @@ class Picker:
         p.bottom_left_edge_min = (p.grid_height -2, 0)
         return p
 
-    def visible(self) -> bool:
-        return False
-
     @staticmethod
     def shift_right(p:Picker):
         p.top = (p.top[0], p.top[1] + 1)
@@ -72,40 +50,16 @@ class Picker:
         p.bot = (p.bot[0], p.bot[1] + 1)
         p.left = (p.left[0], p.left[1] + 1)
         p.center = (p.center[0], p.center[1] + 1)
-        Picker.setBoundaryState(p)
 
     @staticmethod
     def start_left(p:Picker):
-        p.top = (p.top[0] + 1, 1) #p.top[1])
-        p.right = (p.right[0] + 1, 2) #, p.right[1])
-        p.bot = (p.bot[0] + 1, 1) #, p.bot[1])
-        p.left = (p.left[0] + 1, 0) #p.left[1])
-        p.center = (p.center[0] + 1, 1) #, p.center[1])
-        Picker.setBoundaryState(p)
-
-    @staticmethod
-    def setBoundaryState(p:Picker):
+        p.top = (p.top[0] + 1, 1) 
+        p.right = (p.right[0] + 1, 2) 
+        p.bot = (p.bot[0] + 1, 1) 
+        p.left = (p.left[0] + 1, 0) 
+        p.center = (p.center[0] + 1, 1) 
         p.is_corner = False
         p.is_edge = False
-        p.corner = Corner.NONE
-        p.edge = Edge.NONE
-
-        # corner states - picker initialized to top left corner
-        if ( p.right == p.top_right_edge_max and p.top == p.top_edge_max ):
-            p.is_corner = True
-            p.corner = Corner.TOP_RIGHT
-
-        elif ( p.right == p.bottom_right_edge_max and p.bot == p.bottom_edge_max ):
-            p.is_corner = True
-            p.corner = Corner.BOT_RIGHT
-
-        elif ( p.bot == p.bottom_edge_min and p.left == p.bottom_left_edge_min ):
-            p.is_corner = True
-            p.corner = Corner.BOT_LEFT
-        
-        elif ( state := p.getEdgeState() == Edge.TOP ):
-            p.is_edge = True
-            p.edge = state
             
     def preview_shift_right(self):
         edge_test = self.right[1] + 1
@@ -150,20 +104,29 @@ class Grid:
             return self.getPickerValues()
         return ret_value
 
-    def getCurrentPicker(self):
-        return self.cur_picker
-
     def getPickerValues(self) -> list(type()):
-        lval = self.map[self.cur_picker.left[0]][self.cur_picker.left[1]]
-        l = ('L', lval)
-        rval = self.map[self.cur_picker.right[0]][self.cur_picker.right[1]]
-        r = ('R', rval)
         tval = self.map[self.cur_picker.top[0]][self.cur_picker.top[1]]
         t = ('T', tval)
-        bval = self.map[self.cur_picker.bot[0]][self.cur_picker.bot[1]]
-        b = ('B', bval)
+
+        lval = self.map[self.cur_picker.left[0]][self.cur_picker.left[1]]
+        l = ('L', lval)
+        
         cval = self.map[self.cur_picker.center[0]][self.cur_picker.center[1]]
         c = ('C', cval)
 
-        return (t,l,c,r,b)
+        rval = self.map[self.cur_picker.right[0]][self.cur_picker.right[1]]
+        r = ('R', rval)
         
+        bval = self.map[self.cur_picker.bot[0]][self.cur_picker.bot[1]]
+        b = ('B', bval)
+        
+        return (t,l,c,r,b)
+    
+    def score(self) -> bool:
+        cluster = self.getPickerValues()
+        top = cluster[0][1]
+        left = cluster[1][1]
+        tree_house = cluster[2][1]
+        right = cluster[3][1]
+        bot = cluster[4][1]
+        return (top < tree_house or left < tree_house or right < tree_house or bot < tree_house)
