@@ -68,8 +68,6 @@ class Picker:
     def preview_start_left(self):
         edge_test = self.bot[0] + 1
         return edge_test < self.grid_height
-
-    def getEdgeState(self): 
         ret_value = Edge.NONE
 
         # top edge
