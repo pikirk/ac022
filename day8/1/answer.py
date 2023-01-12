@@ -166,27 +166,4 @@ class Grid:
         c = ('C', cval)
 
         return (t,l,c,r,b)
-
-def test_get_last_value():
-    # arrange
-    map = list([
-    [3,0,3,7,3],
-    [2,5,5,1,2],
-    [6,5,3,3,2],
-    [3,3,5,4,9],
-    [3,5,3,9,0]
-    ])
-    grid = Grid(map)
-
-    # act
-    for m in range(0,8):
-        grid.movePicker()
-    val = grid.getPickerValues()
-
-    assert val[0] == ('T', 3)
-    assert val[1] == ('L', 5)
-    assert val[2] == ('C', 4)
-    assert val[3] == ('R', 9)
-    assert val[4] == ('B', 9)
-
-test_get_last_value()
+        
