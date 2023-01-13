@@ -80,11 +80,11 @@ class Grid:
         can_shift_right = self.cur_picker.preview_shift_right()
         can_start_left = self.cur_picker.preview_start_left()
         if can_shift_right:
-            Picker.shift_right(self.cur_picker)
-            return self.getPickerValues()           
-        
-        if can_start_left:
+            Picker.shift_right(self.cur_picker)            
+        elif can_start_left:
             Picker.start_left(self.cur_picker)
+        else:
+            print("Picker did not move")
 
     '''
     Looks up grid values based on the picker's current position
@@ -114,7 +114,7 @@ class Grid:
     def score(self) -> bool:
         cluster = self.getPickerValues()
         tree_house = cluster[2][1]
-        tree_house_index = self.cur_picker.center[0]
+        tree_house_index = self.cur_picker.center[1]
         heights = self.getX()
 
         # check view from X edges
@@ -126,10 +126,11 @@ class Grid:
 
         # check view from Y edges
         heights = self.getY()
-        visible_left = self.checkLeftEnd(tree_house, tree_house_index, heights)
-        visible_right = self.checkRightEnd(tree_house, tree_house_index, heights)
+        tree_house_index = self.cur_picker.center[0]
+        visible_top = self.checkLeftEnd(tree_house, tree_house_index, heights)
+        visible_bottom = self.checkRightEnd(tree_house, tree_house_index, heights)
         
-        return visible_left or visible_right
+        return visible_top or visible_bottom
 
     def checkRightEnd(self, tree_house, tree_house_index, heights):
         visible = False
@@ -140,6 +141,7 @@ class Grid:
                 visible = True
             elif heights[h] >= tree_house:
                 visible = False
+                break
         return visible
 
     def checkLeftEnd(self, tree_house, tree_house_index, heights) -> bool:
@@ -151,6 +153,7 @@ class Grid:
                 visible = True
             elif heights[h] >= tree_house:
                 visible = False
+                break
         return visible
 
     '''
@@ -158,13 +161,21 @@ class Grid:
     '''
     def scoreGrid(self) -> int:
         ret_value = 0
-        # walk inner trees
+        move_counter = 1
+
+        # first inner tree score - picker initialized at left top corner
+        ret_value +=1 if self.score() else 0
         while self.cur_picker.preview_shift_right() or self.cur_picker.preview_start_left():
-            ret_value +=1 if self.score() else 0
             self.movePicker()
+            ret_value +=1 if self.score() else 0
+            move_counter +=1
+
+        # last inner tree score - picker ends at right bottom corner
+        ret_value +=1 if self.score() else 0
 
         # perimeter value
         ret_value += (self.cur_picker.grid_width * 2) + ((self.cur_picker.grid_height - 2) * 2)
+        print (f"Move counter={move_counter}")
         return ret_value
 
     def getY(self) -> list(int):
@@ -177,7 +188,7 @@ class Grid:
     def getX(self) -> list(int):
         result = []
         x = self.cur_picker.left[0]
-        for c in range(0, self.cur_picker.grid_height):
+        for c in range(0, self.cur_picker.grid_width):
             result.append(self.map[x][c])
         return result
 
@@ -191,3 +202,4 @@ grid = Grid(rows)
 print (grid.scoreGrid())
 # 7153 too high
 # 7037 too high
+# 1712 too high
