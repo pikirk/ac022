@@ -310,3 +310,35 @@ def test_score_grid():
     result = grid.scoreGrid()
 
     assert 5 + 16 == result
+
+def test_get_y_row_values():
+     # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    result = grid.getY()
+
+    assert result == [0,5,5,3,5]
+
+def test_get_x_row_values():
+     # arrange
+    map = list([
+    [3,0,3,7,3],
+    [2,5,5,1,2],
+    [6,5,3,3,2],
+    [3,3,5,4,9],
+    [3,5,3,9,0]
+    ])
+    grid = Grid(map)
+
+    # act
+    result = grid.getX()
+
+    assert result == [2,5,5,1,2]

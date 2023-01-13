@@ -113,12 +113,45 @@ class Grid:
     '''
     def score(self) -> bool:
         cluster = self.getPickerValues()
-        top = cluster[0][1]
-        left = cluster[1][1]
         tree_house = cluster[2][1]
-        right = cluster[3][1]
-        bot = cluster[4][1]
-        return (top < tree_house or left < tree_house or right < tree_house or bot < tree_house) 
+        tree_house_index = self.cur_picker.center[0]
+        heights = self.getX()
+
+        # check view from X edges
+        visible_left = self.checkLeftEnd(tree_house, tree_house_index, heights)
+        visible_right = self.checkRightEnd(tree_house, tree_house_index, heights)
+
+        if visible_left or visible_right:
+            return True
+
+        # check view from Y edges
+        heights = self.getY()
+        visible_left = self.checkLeftEnd(tree_house, tree_house_index, heights)
+        visible_right = self.checkRightEnd(tree_house, tree_house_index, heights)
+        
+        return visible_left or visible_right
+
+    def checkRightEnd(self, tree_house, tree_house_index, heights):
+        visible = False
+        for h in range(len(heights) - 1, 0, -1):
+            if h == tree_house_index:
+                break
+            elif heights[h] < tree_house:
+                visible = True
+            elif heights[h] >= tree_house:
+                visible = False
+        return visible
+
+    def checkLeftEnd(self, tree_house, tree_house_index, heights) -> bool:
+        visible = False
+        for h in range(0, len(heights) - 1):
+            if h == tree_house_index:
+                break
+            elif heights[h] < tree_house:
+                visible = True
+            elif heights[h] >= tree_house:
+                visible = False
+        return visible
 
     '''
     Processes grid left to right starting at left corner
@@ -134,6 +167,20 @@ class Grid:
         ret_value += (self.cur_picker.grid_width * 2) + ((self.cur_picker.grid_height - 2) * 2)
         return ret_value
 
+    def getY(self) -> list(int):
+        result = []
+        y = self.cur_picker.top[1]
+        for r in range(0, self.cur_picker.grid_height):
+            result.append(self.map[r][y])
+        return result
+
+    def getX(self) -> list(int):
+        result = []
+        x = self.cur_picker.left[0]
+        for c in range(0, self.cur_picker.grid_height):
+            result.append(self.map[x][c])
+        return result
+
 rows = []
 with open("/Users/pikirk/src/aoc22/day8/1/input.txt", "r") as input:
     for line in input:
@@ -142,5 +189,5 @@ with open("/Users/pikirk/src/aoc22/day8/1/input.txt", "r") as input:
 
 grid = Grid(rows)
 print (grid.scoreGrid())
-
 # 7153 too high
+# 7037 too high
