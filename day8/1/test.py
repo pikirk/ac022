@@ -342,3 +342,4 @@ def test_get_x_row_values():
     result = grid.getX()
 
     assert result == [2,5,5,1,2]
+

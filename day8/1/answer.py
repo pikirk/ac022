@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Tuple
+import numpy as np
 
 '''
 Responsible for knowing its position on the tree map
@@ -144,7 +145,7 @@ class Grid:
                 break
         return visible
 
-    def checkLeftEnd(self, tree_house, tree_house_index, heights) -> bool:
+    def checkLeftEnd(self, tree_house:int, tree_house_index:int, heights:list[int]) -> bool:
         visible = False
         for h in range(0, len(heights) - 1):
             if h == tree_house_index:
@@ -170,10 +171,6 @@ class Grid:
             ret_value +=1 if self.score() else 0
             move_counter +=1
 
-        # last inner tree score - picker ends at right bottom corner
-        ret_value +=1 if self.score() else 0
-
-        # perimeter value
         ret_value += (self.cur_picker.grid_width * 2) + ((self.cur_picker.grid_height - 2) * 2)
         print (f"Move counter={move_counter}")
         return ret_value
@@ -200,6 +197,5 @@ with open("/Users/pikirk/src/aoc22/day8/1/input.txt", "r") as input:
 
 grid = Grid(rows)
 print (grid.scoreGrid())
-# 7153 too high
-# 7037 too high
-# 1712 too high
+
+
