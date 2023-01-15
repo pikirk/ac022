@@ -39,10 +39,6 @@ class FileSystem:
     def parseFileInfo(self, file:str) -> Tuple[int, str]:
         parts = file.split(" ")
         return (int(parts[0]), parts[1])
-        check = 100000
-        files = self.dag.nodes[0]['files']
-        root_size = sum( [f[0] for f in files] )
-        return root_size if (root_size <= check) else 0
 
     def parseInput(self, statements:list):
         ls = []
